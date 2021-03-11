@@ -7,19 +7,22 @@ using SharpDevelopWebApi.Models;
 
 namespace SharpDevelopWebApi.Controllers
 {
+	/// <summary>
+	/// Description of ProfileController.
+	/// </summary>
 	public class ProfileController : ApiController
 	{
 		readonly SDWebApiDbContext _db = new SDWebApiDbContext();
 		
-	    [HttpPost]
-		[Route("api/profile/create")]		
-	    public IHttpActionResult Create(Profile profile)
-	    {
-	    	_db.Profiles.Add(profile);
-	        _db.SaveChanges();
-	        return Ok(profile);
-	    }
-	    
+		[HttpPost]
+		[Route("api/profile")]		
+        public IHttpActionResult Create(Profile profile)
+        {
+        	_db.Profiles.Add(profile);
+            _db.SaveChanges();
+            return Ok(profile);
+        }
+        
 	    [HttpGet]
 		[Route("api/profile/all")]		
         public IHttpActionResult GetAll(string keyword = "")
@@ -29,58 +32,35 @@ namespace SharpDevelopWebApi.Controllers
             if(!string.IsNullOrEmpty(keyword))
             {
                profiles = _db.Profiles
-               	.Where(x => x.FirstName.Contains(keyword))
+               	.Where(x => x.MobileNumber.Contains(keyword))
                     .ToList();
             }
             profiles = _db.Profiles.ToList();
             return Ok(profiles);
         }
         
-       	[HttpGet]
-    	[Route("api/profile/find/{Id}")]		
+        [HttpGet]
+    	[Route("api/profile/findById/{Id}")]		
         public IHttpActionResult Get(int Id)
         {       
             var profile = _db.Profiles.Find(Id);
             if (profile != null)
                 return Ok(profile);
             else
-                return BadRequest("Profile is invalid or not found");
+                return BadRequest("Profile not found");
         }
-		[HttpGet]
+        [HttpGet]
     	[Route("api/profile/findBySpecialId/{Id}")]		
         public IHttpActionResult GetBySpecialId(int Id)
         {       
-        	var profile = _db.Profiles.Where(x => x.specialId == Id).Take(1);
+        	var profile = _db.Profiles.Where(x => x.SpecialId == Id);
             if (profile != null)
                 return Ok(profile);
             else
-                return BadRequest("Special Id is invalid or not found");
+                return BadRequest("Profile not found");
         }
-        [HttpPut]
-        [Route("api/profile/update")]		
-        public IHttpActionResult Update(Profile profileEdit)
-        {
-            var profile = _db.Profiles.Find(profileEdit.Id);
-            if (profile != null)
-            {	
-            	profile.FirstName = profileEdit.FirstName;
-            	profile.LastName = profileEdit.LastName;
-            	profile.Gender = profileEdit.Gender;
-            	profile.Media = profileEdit.Media;
-            	profile.BirthDate = profileEdit.BirthDate;
-            	profile.Address = profileEdit.Address;
-            	profile.ShortDescription = profileEdit.ShortDescription;
-            	
-                _db.Entry(profile).State = System.Data.Entity.EntityState.Modified;
-                _db.SaveChanges();
-                return Ok(profile);
-            }
-            else
-                return BadRequest("Profile id is invalid or not found");
-        }
-        
         [HttpDelete]
-        [Route("api/profile/remove/{Id}")]		
+        [Route("api/profile/{Id}")]		
         public IHttpActionResult Delete(int Id)
         {
             var profile = _db.Profiles.Find(Id);
@@ -91,8 +71,30 @@ namespace SharpDevelopWebApi.Controllers
                 return Ok("Profile removed successfully!");
             }
             else
-                return BadRequest("Profile id is invalid or not found");
+                return BadRequest("Profile not found");
         }
-        
+        [HttpPut]
+        [Route("api/profile")]		
+        public IHttpActionResult Update(Profile profileEdit)
+        {
+            var profile = _db.Profiles.Find(profileEdit.Id);
+            
+            if (profile != null)
+            {	
+            	profile.FirstName = profileEdit.FirstName;
+            	profile.LastName = profileEdit.LastName;
+            	profile.MobileNumber = profileEdit.MobileNumber;
+            	profile.ProfileStatus = profileEdit.ProfileStatus;
+            	profile.SubscriptionType = profileEdit.SubscriptionType;
+            	            	
+                _db.Entry(profile).State = System.Data.Entity.EntityState.Modified;
+                _db.SaveChanges();
+
+                return Ok(profile);
+            }
+            else
+                return BadRequest("Profile not found");
+        }
+		
 	}
 }
